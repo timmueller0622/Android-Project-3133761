@@ -82,6 +82,15 @@ class Menu : ComponentActivity() {
                         soundId.value = "wood"
                     })
                 }
+                Row(modifier = Modifier.padding(20.dp)){
+                    Spacer(modifier = Modifier.width(20.dp))
+                    SoundButton(painterResource(id = R.drawable.recorder), "custom", {
+                        playSound.reset()
+                        playSound = MediaPlayer.create(context, R.raw.bassoong3)
+                        playSound.start()
+                        soundId.value = "wood"
+                    })
+                }
                 // SoundButton(painterResource(id = R.drawable.music), "custom", {})
                 ExtendedFloatingActionButton(onClick = {
                     intent.putExtra("soundId", soundId.value)

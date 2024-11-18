@@ -5,8 +5,10 @@ import android.content.Intent
 import android.media.Image
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,7 +45,18 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val intent = Intent(this, Menu::class.java)
-            val fileIntent = Intent(DownloadManager.ACTION_VIEW_DOWNLOADS)
+            val pickSoundFileLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.StartActivityForResult()
+            ) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    val selectedUri = result.data?.data
+                    // Handle the selected audio file URI
+                }
+            }
+            val fileIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "audio/mpeg" //filters for only mp3 files
+            }
             Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally){
                 Text("Sound Modulator")
                 Spacer(modifier = Modifier.padding(10.dp))
@@ -52,7 +65,13 @@ class MainActivity : ComponentActivity() {
                     Text("Select Sound")
                 }
                 Spacer(modifier = Modifier.padding(10.dp))
-                ExtendedFloatingActionButton(onClick = {startActivity(fileIntent)}) {
+                ExtendedFloatingActionButton(onClick = {
+                    pickSoundFileLauncher.launch(
+                        Intent.createChooser(
+                            intent, getString(R.string.select_audio_file_title)
+                        )
+                    )
+                }) {
                     Icon(Icons.Filled.Add, "Add")
                     Text("New Custom Sound")
                 }

@@ -1,5 +1,6 @@
 package com.example.androidproject3133761
 
+import android.app.DownloadManager
 import android.content.Intent
 import android.media.Image
 import android.os.Bundle
@@ -42,17 +43,18 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val intent = Intent(this, Menu::class.java)
+            val fileIntent = Intent(DownloadManager.ACTION_VIEW_DOWNLOADS)
             Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally){
-                Text("Sound Guide")
-                Spacer(modifier = Modifier.padding(10.dp))
-                ExtendedFloatingActionButton(onClick = {}) {
-                    Icon(Icons.Filled.Add, "Add")
-                    Text("New Custom Sound")
-                }
+                Text("Sound Modulator")
                 Spacer(modifier = Modifier.padding(10.dp))
                 ExtendedFloatingActionButton(onClick = {startActivity(intent)}) {
                     Icon(Icons.Filled.PlayArrow, "Add")
                     Text("Select Sound")
+                }
+                Spacer(modifier = Modifier.padding(10.dp))
+                ExtendedFloatingActionButton(onClick = {startActivity(fileIntent)}) {
+                    Icon(Icons.Filled.Add, "Add")
+                    Text("New Custom Sound")
                 }
                 Spacer(modifier = Modifier.padding(10.dp))
                 ExtendedFloatingActionButton(onClick = {}) {
@@ -60,9 +62,6 @@ class MainActivity : ComponentActivity() {
                     Text("Instructions")
                 }
             }
-
-
-
         }
     }
 }

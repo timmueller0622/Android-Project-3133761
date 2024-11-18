@@ -47,14 +47,14 @@ class Menu : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val intent = Intent(this, Player::class.java)
-            var playSound: MediaPlayer = MediaPlayer()
-            val context = this
-            //val mp2 = arrayOf(MediaPlayer.create(this, R.raw.celloc4), MediaPlayer.create(this, R.raw.synthbass), MediaPlayer.create(this, R.raw.hornc4), MediaPlayer.create(this, R.raw.bassoong3))
+            var playSound: MediaPlayer = MediaPlayer() //initialization happens here with an empty player. sounds added for every button
+            val context = this //context relevant to create mediaplayer and pass along in intent
             Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center){
                 Text("Choose Your Sound")
                 Row(modifier = Modifier.padding(10.dp)){
                     SoundButton(painterResource(id = R.drawable.violin), "strings", {
                         playSound.reset()
+                        //media player needs to be reinitialized every time it is reset so a differet sound can be attached
                         playSound = MediaPlayer.create(context, R.raw.celloc4)
                         playSound.start()
                         soundId.value = "string"
@@ -95,7 +95,7 @@ class Menu : ComponentActivity() {
         }
     }
 }
-
+//Creates the sound selection button
 @Composable
 fun SoundButton(icon: Painter, name: String, onClick: () -> Unit){
     Button(modifier = Modifier.size(100.dp, 100.dp), shape = RoundedCornerShape(20),onClick = onClick) {
@@ -103,17 +103,5 @@ fun SoundButton(icon: Painter, name: String, onClick: () -> Unit){
             Icon(icon, name, modifier = Modifier.size(60.dp))
             Text(name)
         }
-
     }
-}
-
-fun startStop(allSounds: Array<MediaPlayer>, soundToPlay: Int){
-    var c = 0
-    for (sound in allSounds){
-        if (c == soundToPlay)
-            continue;
-        sound.reset()
-        c++
-    }
-    allSounds[soundToPlay].start()
 }

@@ -50,7 +50,7 @@ class Player : ComponentActivity() {
                         Row {
                             // IconButton for Start Action
                             IconButton(onClick = {
-                                if (sound != null) {
+                                if (sound != null) { //nullcheck necessary
                                     sound.start()
                                 }
                             }) {
@@ -59,7 +59,7 @@ class Player : ComponentActivity() {
 
                             // IconButton for Pause Action
                             IconButton(onClick = {
-                                if (sound != null) {
+                                if (sound != null) { //nullcheck necessary
                                     sound.pause()
                                 }
                             }) {
@@ -77,8 +77,9 @@ class Player : ComponentActivity() {
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.Top,
                 ) {
+                    //Controls button that will pop out user controls later on
                     Button(onClick = {}){
-                        Text("Equalizer")
+                        Text("Controls")
                     }
                 }
             }
@@ -86,17 +87,10 @@ class Player : ComponentActivity() {
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
+//method that assigns correct sound to media player based on selection in previous activity
 fun SelectedSound(correctSound: String, context: Context): MediaPlayer? {
     when (correctSound){
-        "strings" -> return MediaPlayer.create(context, R.raw.celloc4)
+        "string" -> return MediaPlayer.create(context, R.raw.celloc4)
         "synth" -> return MediaPlayer.create(context, R.raw.synthbass)
         "brass" -> return MediaPlayer.create(context, R.raw.hornc4)
         "wood" -> return MediaPlayer.create(context, R.raw.bassoong3)
@@ -104,6 +98,4 @@ fun SelectedSound(correctSound: String, context: Context): MediaPlayer? {
             return MediaPlayer()
         }
     }
-
-
 }

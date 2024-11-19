@@ -1,11 +1,14 @@
 package com.example.androidproject3133761
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,7 +33,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,15 +46,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.androidproject3133761.ui.theme.AndroidProject3133761Theme
 
-var soundId = mutableStateOf("")
+
 class Menu : ComponentActivity() {
+    private var soundId = mutableStateOf("")
+    private var mediaPlayer: MediaPlayer? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val intent = Intent(this, Player::class.java)
             var playSound: MediaPlayer = MediaPlayer() //initialization happens here with an empty player. sounds added for every button
             val context = this //context relevant to create mediaplayer and pass along in intent
+
+            val selectedAudioUri = Uri.parse(intent.getStringExtra("customSound"))
+
+            val intent = Intent(this, Player::class.java)
+            Text(selectedAudioUri?.path.toString())
+
             Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center){
                 Text("Choose Your Sound")
                 Row(modifier = Modifier.padding(10.dp)){
@@ -84,11 +98,14 @@ class Menu : ComponentActivity() {
                 }
                 Row(modifier = Modifier.padding(20.dp)){
                     Spacer(modifier = Modifier.width(20.dp))
-                    SoundButton(painterResource(id = R.drawable.recorder), "custom", {
-                        playSound.reset()
-                        playSound = MediaPlayer.create(context, R.raw.bassoong3)
-                        playSound.start()
-                        soundId.value = "wood"
+                    SoundButton(painterResource(id = R.drawable.music), selectedAudioUri?.path.toString(), {
+                        playSound = MediaPlayer().apply {
+                            setDataSource(this@Menu, selectedAudioUri!!)
+                            prepare()
+                            start()
+                        }
+
+                        soundId.value = selectedAudioUri?.path.toString()
                     })
                 }
                 // SoundButton(painterResource(id = R.drawable.music), "custom", {})

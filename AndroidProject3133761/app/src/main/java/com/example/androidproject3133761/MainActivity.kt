@@ -1,8 +1,10 @@
 package com.example.androidproject3133761
 
+import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.Intent
 import android.media.Image
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -31,6 +33,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
@@ -40,19 +46,22 @@ import androidx.compose.ui.unit.dp
 import com.example.androidproject3133761.ui.theme.AndroidProject3133761Theme
 
 class MainActivity : ComponentActivity() {
+    var selectedAudioUri: Uri? by mutableStateOf(null)
+    val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        selectedAudioUri = uri
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             val intent = Intent(this, Menu::class.java)
-            val pickSoundFileLauncher = rememberLauncherForActivityResult(
-                contract = ActivityResultContracts.StartActivityForResult()
-            ) { result ->
-                if (result.resultCode == RESULT_OK) {
-                    val selectedUri = result.data?.data
-                    // Handle the selected audio file URI
-                }
-            }
+            var customSoundUploaded by remember {mutableStateOf(false)}
+
+
+
+
+
+
             val fileIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 type = "audio/mpeg" //filters for only mp3 files
@@ -63,18 +72,24 @@ class MainActivity : ComponentActivity() {
                 ExtendedFloatingActionButton(onClick = {startActivity(intent)}) {
                     Icon(Icons.Filled.PlayArrow, "Add")
                     Text("Select Sound")
+
                 }
                 Spacer(modifier = Modifier.padding(10.dp))
                 ExtendedFloatingActionButton(onClick = {
-                    pickSoundFileLauncher.launch(
-                        Intent.createChooser(
-                            intent, getString(R.string.select_audio_file_title)
-                        )
-                    )
+                    customSoundUploaded = false
+                    getContent.launch("audio/*")
+                    customSoundUploaded = true
                 }) {
                     Icon(Icons.Filled.Add, "Add")
-                    Text("New Custom Sound")
+                    if (customSoundUploaded){
+                        Text(text = "Selected: " + selectedAudioUri?.path)
+                        intent.putExtra("customSound", selectedAudioUri.toString())
+                    }
+                    else
+                        Text("New Custom Sound")
+
                 }
+
                 Spacer(modifier = Modifier.padding(10.dp))
                 ExtendedFloatingActionButton(onClick = {}) {
                     Icon(Icons.Filled.Info, "Add")

@@ -90,7 +90,7 @@ class Menu : ComponentActivity() {
                     Spacer(modifier = Modifier.width(20.dp))
                     SoundButton(painterResource(id = R.drawable.music), selectedAudioUri?.path.toString(), {
                         playSound = MediaPlayer().apply {
-                            //setDataSource(this@Menu, selectedAudioUri!!)
+                            setDataSource(this@Menu, selectedAudioUri!!)
                             prepare()
                             start()
                         }

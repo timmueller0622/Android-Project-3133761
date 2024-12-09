@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.dp
 
 class Menu : ComponentActivity() {
     private var soundId = mutableStateOf("")
-    private var mediaPlayer: MediaPlayer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -120,4 +119,8 @@ fun SoundButton(icon: Painter, name: String, onClick: () -> Unit){
             Text(name)
         }
     }
+}
+
+fun PlaySound(player: MediaPlayer){
+
 }

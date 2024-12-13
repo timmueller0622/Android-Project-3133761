@@ -2,8 +2,9 @@ package com.example.androidproject3133761
 
 import android.content.Context
 import android.media.MediaPlayer
+import android.net.Uri
 
-public class SoundPlayer (private val context: Context) {
+public class SoundPlayer (private var context: Context) {
 
     private var mediaPlayer: MediaPlayer? = null
 
@@ -27,6 +28,14 @@ public class SoundPlayer (private val context: Context) {
         mediaPlayer?.start()
     }
 
+    fun applySound(resUri: Uri){
+        mediaPlayer?.apply{
+            setDataSource(context, resUri)
+            prepare()
+            start()
+        }
+    }
+
     /**
      * Releases the MediaPlayer resources when they are no longer needed.
      */
@@ -42,5 +51,9 @@ public class SoundPlayer (private val context: Context) {
      */
     fun isPlaying(): Boolean {
         return mediaPlayer?.isPlaying ?: false
+    }
+
+    fun changeContext(newContext: Context) {
+        context = newContext
     }
 }

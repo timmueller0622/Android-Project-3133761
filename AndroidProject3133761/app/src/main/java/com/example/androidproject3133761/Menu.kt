@@ -56,8 +56,8 @@ class Menu : ComponentActivity() {
                 Text("Choose Your Sound")
                 Row(modifier = Modifier.padding(10.dp)){
                     SoundButton(painterResource(id = R.drawable.violin), "strings", {
+                        //create own media player class
                         playSound.reset()
-                        //media player needs to be reinitialized every time it is reset so a differet sound can be attached
                         playSound = MediaPlayer.create(context, R.raw.celloc4)
                         playSound.start()
                         soundId.value = "string"
@@ -107,7 +107,13 @@ class Menu : ComponentActivity() {
                 }
             }
 
+
+
+
+
         }
+
+
     }
 }
 //Creates the sound selection button
@@ -121,6 +127,4 @@ fun SoundButton(icon: Painter, name: String, onClick: () -> Unit){
     }
 }
 
-fun PlaySound(player: MediaPlayer){
 
-}

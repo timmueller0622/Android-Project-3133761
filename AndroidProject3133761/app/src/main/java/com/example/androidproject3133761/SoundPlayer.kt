@@ -28,7 +28,8 @@ public class SoundPlayer (private var context: Context) {
         mediaPlayer?.start()
     }
 
-    fun applySound(resUri: Uri){
+    fun playSoundFromUri(resUri: Uri){
+        mediaPlayer = MediaPlayer() // Ensure MediaPlayer is initialized with empty MediaPlayer before data source from Uri is set
         mediaPlayer?.apply{
             setDataSource(context, resUri)
             prepare()

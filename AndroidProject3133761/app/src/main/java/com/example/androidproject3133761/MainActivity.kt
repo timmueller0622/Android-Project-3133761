@@ -57,11 +57,6 @@ class MainActivity : ComponentActivity() {
             val intent = Intent(this, Menu::class.java)
             var customSoundUploaded by remember {mutableStateOf(false)}
 
-
-
-
-
-
             val fileIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 type = "audio/mpeg" //filters for only mp3 files

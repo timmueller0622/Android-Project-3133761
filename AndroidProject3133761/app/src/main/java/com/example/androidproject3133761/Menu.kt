@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -54,20 +55,46 @@ class Menu : ComponentActivity() {
             Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center){
                 Text("Choose Your Sound")
                 Row(modifier = Modifier.padding(10.dp)){
-                    SoundButton(painterResource(id = R.drawable.violin), "strings", soundPlayer, R.raw.celloc4)
+                    SoundButton(
+                        painterResource(id = R.drawable.violin),
+                        "strings",
+                        soundPlayer,
+                        R.raw.celloc4,
+                        Uri.EMPTY
+                    )
                     Spacer(modifier = Modifier.width(20.dp))
-                    SoundButton(painterResource(id = R.drawable.keyboard), "synth", soundPlayer, R.raw.synthbass)
+                    SoundButton(
+                        painterResource(id = R.drawable.keyboard),
+                        "synth",
+                        soundPlayer,
+                        R.raw.synthbass,
+                        Uri.EMPTY
+                    )
                 }
                 Row(modifier = Modifier.padding(20.dp)){
-                    SoundButton(painterResource(id = R.drawable.trumpet), "brass", soundPlayer, R.raw.hornc4)
+                    SoundButton(
+                        painterResource(id = R.drawable.trumpet),
+                        "brass",
+                        soundPlayer,
+                        R.raw.hornc4,
+                        Uri.EMPTY
+                    )
                     Spacer(modifier = Modifier.width(20.dp))
-                    SoundButton(painterResource(id = R.drawable.recorder), "wood", soundPlayer, R.raw.bassoong3)
+                    SoundButton(
+                        painterResource(id = R.drawable.recorder),
+                        "wood",
+                        soundPlayer,
+                        R.raw.bassoong3,
+                        Uri.EMPTY
+                    )
                 }
+
                 Row(modifier = Modifier.padding(20.dp)){
                     Spacer(modifier = Modifier.width(20.dp))
-                    SoundButton(painterResource(id = R.drawable.music), selectedAudioUri?.path.toString(), soundPlayer, R.raw.celloc4)
+                    SoundButton(painterResource(id = R.drawable.music), selectedAudioUri?.path.toString(), soundPlayer, 0, selectedAudioUri)
                 }
-                //SoundButton(painterResource(id = R.drawable.music), "custom", {})
+
+
                 ExtendedFloatingActionButton(onClick = {
                     currentIntent.putExtra("soundId", soundName.value)
                     startActivity(currentIntent)
@@ -76,29 +103,29 @@ class Menu : ComponentActivity() {
                     Text("Get Started")
                 }
             }
-
-
-
-
-
         }
-
-
     }
 }
 
 
-//Creates the sound selection button
+/**
+ * Creates the sound selector button
+ */
 @Composable
 fun SoundButton(
     icon: Painter,
     name: String,
     soundPlayer: SoundPlayer,
-    soundId: Int
+    soundId: Int,
+    selectedAudioUri: Uri
 ){
     Button(modifier = Modifier.size(100.dp, 100.dp), shape = RoundedCornerShape(20),onClick = {
-        //create own media player class
-        soundPlayer.playSound(soundId)
+        //check for soundId. If 0, then we use alternate way for soundPlayer to play sound via Uri
+        if (soundId == 0){
+            soundPlayer.playSoundFromUri(selectedAudioUri)
+        }
+        else
+            soundPlayer.playSound(soundId)
     }) {
         Column(horizontalAlignment = Alignment.CenterHorizontally){
             Icon(icon, name, modifier = Modifier.size(60.dp))

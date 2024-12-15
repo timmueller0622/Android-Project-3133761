@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 
 
 class Menu : ComponentActivity() {
-    private var soundName = mutableStateOf("")
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,7 +96,7 @@ class Menu : ComponentActivity() {
 
 
                 ExtendedFloatingActionButton(onClick = {
-                    currentIntent.putExtra("soundId", soundName.value)
+                    currentIntent.putExtra("soundId", soundPlayer.getSoundName())
                     startActivity(currentIntent)
                 }) {
                     Icon(Icons.Filled.PlayArrow, "play")
@@ -119,6 +119,7 @@ fun SoundButton(
     soundId: Int,
     selectedAudioUri: Uri
 ){
+    soundPlayer.setSoundName(name)
     Button(modifier = Modifier.size(100.dp, 100.dp), shape = RoundedCornerShape(20),onClick = {
         //check for soundId. If 0, then we use alternate way for soundPlayer to play sound via Uri
         if (soundId == 0){

@@ -14,7 +14,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
@@ -35,14 +34,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import kotlin.math.absoluteValue
 
 
 class Player : ComponentActivity() {
+    private var sound: MediaPlayer? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val selectedSound = intent.getStringExtra("soundId")
         enableEdgeToEdge()
-        val sound = SelectedSound(selectedSound.toString(), this)
+        sound = createSoundPlayer(selectedSound.toString(), this)
 
         val sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         val gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
@@ -62,6 +64,9 @@ class Player : ComponentActivity() {
                             gyroX = it.values[0]
                             gyroY = it.values[1]
                             gyroZ = it.values[2]
+
+                            // Update sound properties dynamically
+                            updateSoundProperties(gyroX, gyroY, gyroZ)
                         }
                     }
 
@@ -95,55 +100,52 @@ class Player : ComponentActivity() {
                         Row {
                             // IconButton for Start Action
                             IconButton(onClick = {
-                                if (sound != null) { //nullcheck necessary
-                                    sound.start()
-                                }
+                                sound = MediaPlayer.create(this@Player, R.raw.celloc4)
+                                sound?.start()
                             }) {
                                 Icon(Icons.Filled.PlayArrow, "play")
                             }
 
                             // IconButton for Pause Action
                             IconButton(onClick = {
-                                if (sound != null) { //nullcheck necessary
-                                    sound.pause()
-                                }
+                                sound?.pause()
                             }) {
                                 Icon(Icons.Filled.Close, "pause")
                             }
                         }
                     }
                 }
-                // Buttons content
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp)
-                        .background(Color.Blue.copy(alpha = 0.5f)),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.Top,
-                ) {
-                    //Controls button that will pop out user controls later on
-                    Button(onClick = {}){
-                        Text("Controls")
-                    }
-                }
             }
+        }
+    }
+
+    private fun updateSoundProperties(gyroX: Float, gyroY: Float, gyroZ: Float) {
+        val volume = calculateVolume(gyroX, gyroY)
+        sound?.setVolume(volume, volume)
+    }
+
+    private fun calculateVolume(gyroX: Float, gyroY: Float): Float {
+        // Map gyroscope values to a volume range (0.0f to 1.0f)
+        return (gyroX.absoluteValue + gyroY.absoluteValue).coerceIn(0f, 1f)
+    }
+}
+
+/**
+ * Method that assigns correct sound to media player based on selection in previous activity
+ */
+fun createSoundPlayer(correctSound: String, context: Context): MediaPlayer? {
+    return when (correctSound){
+        "strings" -> MediaPlayer.create(context, R.raw.celloc4)
+        "synth" -> MediaPlayer.create(context, R.raw.synthbass)
+        "brass" -> MediaPlayer.create(context, R.raw.hornc4)
+        "wood" -> MediaPlayer.create(context, R.raw.bassoong3)
+        else -> {
+            MediaPlayer()
         }
     }
 }
 
-//method that assigns correct sound to media player based on selection in previous activity
-fun SelectedSound(correctSound: String, context: Context): MediaPlayer? {
-    when (correctSound){
-        "string" -> return MediaPlayer.create(context, R.raw.celloc4)
-        "synth" -> return MediaPlayer.create(context, R.raw.synthbass)
-        "brass" -> return MediaPlayer.create(context, R.raw.hornc4)
-        "wood" -> return MediaPlayer.create(context, R.raw.bassoong3)
-        else -> {
-            return MediaPlayer()
-        }
-    }
-}
+
 
 
 @Composable

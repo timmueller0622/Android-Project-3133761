@@ -3,10 +3,22 @@ package com.example.androidproject3133761
 import android.content.Context
 import android.media.MediaPlayer
 import android.net.Uri
+import androidx.compose.runtime.mutableStateOf
 
 public class SoundPlayer (private var context: Context) {
 
     private var mediaPlayer: MediaPlayer? = null
+    /**
+     * Sound name variable that will get set and passed through intent to play back correct sound in Player class
+     */
+    private var soundName = ""
+    fun setSoundName(newSoundName: String){
+        soundName = newSoundName
+    }
+
+    fun getSoundName(): String {
+        return soundName
+    }
 
     /**
      * Resets the MediaPlayer object.
@@ -37,13 +49,6 @@ public class SoundPlayer (private var context: Context) {
         }
     }
 
-    /**
-     * Releases the MediaPlayer resources when they are no longer needed.
-     */
-    fun release() {
-        mediaPlayer?.release()
-        mediaPlayer = null
-    }
 
     /**
      * Check if the MediaPlayer is currently playing a sound.

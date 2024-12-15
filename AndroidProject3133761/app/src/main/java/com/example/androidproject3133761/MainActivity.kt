@@ -2,6 +2,7 @@ package com.example.androidproject3133761
 
 import android.annotation.SuppressLint
 import android.app.DownloadManager
+import android.content.Context
 import android.content.Intent
 import android.media.Image
 import android.net.Uri
@@ -46,38 +47,46 @@ import androidx.compose.ui.unit.dp
 import com.example.androidproject3133761.ui.theme.AndroidProject3133761Theme
 
 class MainActivity : ComponentActivity() {
+    // Variable stores custom uploaded sound Uri
     var selectedAudioUri: Uri? by mutableStateOf(null)
+    // Variable allows access to file registry to upload custom sound
     val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         selectedAudioUri = uri
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val intent = Intent(this, Menu::class.java)
+            val intent = Intent(this, Menu::class.java) // Stores Intent
+            // Variable that allows recomposition once custom sound is uploaded or if Uri is already stored
             var customSoundUploaded by remember {mutableStateOf(false)}
 
-            val fileIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                addCategory(Intent.CATEGORY_OPENABLE)
-                type = "audio/mpeg" //filters for only mp3 files
+            if (getSavedUri() != null){
+                selectedAudioUri = getSavedUri()
+                customSoundUploaded = true
             }
+
             Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally){
                 Text("Sound Modulator")
                 Spacer(modifier = Modifier.padding(10.dp))
-                ExtendedFloatingActionButton(onClick = {startActivity(intent)}) {
-                    Icon(Icons.Filled.PlayArrow, "Add")
-                    Text("Select Sound")
 
+                // Move to sound selection activity
+                ExtendedFloatingActionButton(onClick = {startActivity(intent)}) {
+                    Icon(Icons.Filled.PlayArrow, "Play")
+                    Text("Select Sound")
                 }
                 Spacer(modifier = Modifier.padding(10.dp))
+
+                // Upload custom sound
                 ExtendedFloatingActionButton(onClick = {
-                    customSoundUploaded = false
-                    getContent.launch("audio/*")
+                    getContent.launch("audio/mpeg")
                     customSoundUploaded = true
                 }) {
                     Icon(Icons.Filled.Add, "Add")
                     if (customSoundUploaded){
-                        Text(text = "Selected: " + selectedAudioUri?.path)
+                        Text(text = "Selected: " + selectedAudioUri?.path?.let { getUriFileName(it) })
+                        saveUri(selectedAudioUri)
                         intent.putExtra("customSound", selectedAudioUri.toString())
                     }
                     else
@@ -85,12 +94,7 @@ class MainActivity : ComponentActivity() {
 
                 }
 
-
-
-
-
-                
-
+                // Skip to instructions
                 Spacer(modifier = Modifier.padding(10.dp))
                 ExtendedFloatingActionButton(onClick = {}) {
                     Icon(Icons.Filled.Info, "Add")
@@ -98,5 +102,23 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun getUriFileName(uriPath: String): String {
+        return uriPath.substringAfterLast("/")
+    }
+
+    // Save the Uri persistently
+    private fun saveUri(uri: Uri?) {
+        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        sharedPreferences.edit().putString("selected_audio_uri", uri?.toString()).apply()
+    }
+
+    // Retrieve the Uri
+    private fun getSavedUri(): Uri? {
+        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val uriString = sharedPreferences.getString("selected_audio_uri", null)
+        return if (uriString != null) Uri.parse(uriString)
+        else null
     }
 }

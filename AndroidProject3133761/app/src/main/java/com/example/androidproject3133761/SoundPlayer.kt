@@ -1,13 +1,18 @@
 package com.example.androidproject3133761
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.media.MediaPlayer
 import android.net.Uri
-import androidx.compose.runtime.mutableStateOf
+import android.util.Log
+import java.io.IOException
 
-public class SoundPlayer (private var context: Context) {
+@SuppressLint("StaticFieldLeak")
+object SoundPlayer {
 
     private var mediaPlayer: MediaPlayer? = null
+    private lateinit var context: Context
+
     /**
      * Sound name variable that will get set and passed through intent to play back correct sound in Player class
      */
@@ -15,15 +20,19 @@ public class SoundPlayer (private var context: Context) {
     fun setSoundName(newSoundName: String){
         soundName = newSoundName
     }
-
     fun getSoundName(): String {
         return soundName
+    }
+
+    fun init(currentContext: Context) {
+        context = currentContext.applicationContext
     }
 
     /**
      * Resets the MediaPlayer object.
      */
-    fun reset() {
+    private fun reset() {
+        mediaPlayer?.stop()
         mediaPlayer?.reset()
         mediaPlayer?.release() // Release the resources before resetting
         mediaPlayer = null
@@ -40,12 +49,24 @@ public class SoundPlayer (private var context: Context) {
         mediaPlayer?.start()
     }
 
-    fun playSoundFromUri(resUri: Uri){
-        mediaPlayer = MediaPlayer() // Ensure MediaPlayer is initialized with empty MediaPlayer before data source from Uri is set
-        mediaPlayer?.apply{
-            setDataSource(context, resUri)
-            prepare()
-            start()
+    fun playSoundFromUri( resUri: Uri){
+
+        try {
+            reset() // Ensure previous MediaPlayer is released
+            mediaPlayer = MediaPlayer().apply {
+                setDataSource(context, resUri)
+                prepare() // Prepares synchronously; consider prepareAsync if needed
+                start()
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            Log.e("SoundPlayer", "Error playing sound from URI: ${e.message}")
+        } catch (e: IllegalStateException) {
+            e.printStackTrace()
+            Log.e("SoundPlayer", "MediaPlayer is in an invalid state: ${e.message}")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.e("SoundPlayer", "Unexpected error: ${e.message}")
         }
     }
 

@@ -1,19 +1,16 @@
 package com.example.androidproject3133761
 
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.Settings
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -33,6 +30,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 
 class MainActivity : ComponentActivity() {
     // Variable stores custom uploaded sound Uri
@@ -40,6 +39,9 @@ class MainActivity : ComponentActivity() {
     // Variable allows access to file registry to upload custom sound
     val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         selectedAudioUri = uri
+        // val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
+        // Check for the freshest data.
+        // selectedAudioUri?.let { contentResolver.takePersistableUriPermission(it, takeFlags) }
     }
 
 
@@ -47,13 +49,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             val intent = Intent(this, Menu::class.java) // Stores Intent
             // Variable that allows recomposition once custom sound is uploaded or if Uri is already stored
             var customSoundUploaded by remember {mutableStateOf(false)}
 
             selectedAudioUri = getSavedUri()
-            Text(getSavedUri().toString())
+
             if (getSavedUri() != null)
                 intent.putExtra("customSound", getSavedUri().toString())
 
@@ -76,13 +79,19 @@ class MainActivity : ComponentActivity() {
 
                 // Upload custom sound
                 ExtendedFloatingActionButton(onClick = {
-                    getContent.launch("audio/*")
+                    // Request appropriate permissions based on API level
+                    // val permission = Manifest.permission.READ_MEDIA_AUDIO
+
+                    // requestPermission(permission) {
+                        // Open file picker to select audio
+                        getContent.launch("audio/*")
+                    //}
                     customSoundUploaded = true
                 }) {
                     Icon(Icons.Filled.Add, "Add")
                     if (customSoundUploaded){
                         Text(text = "Selected: " + getUriFileName(selectedAudioUri?.path.toString()))
-                        saveUri(selectedAudioUri.toString())
+                        saveUri(selectedAudioUri)
                         intent.putExtra("customSound", selectedAudioUri.toString())
                     }
                     else{
@@ -92,11 +101,6 @@ class MainActivity : ComponentActivity() {
                             Text("New Custom Sound")
                     }
 
-                }
-
-                if (customSoundUploaded){
-                    Text(selectedAudioUri.toString())
-                    Text(getSavedUri().toString())
                 }
 
                 // Skip to instructions
@@ -113,17 +117,34 @@ class MainActivity : ComponentActivity() {
         return uriPath.substringAfterLast("/")
     }
 
-    // Save the Uri persistently
-    private fun saveUri(uriPath: String) {
+    /**
+     *Save the Uri persistently
+     */
+    private fun saveUri(uri: Uri?) {
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        sharedPreferences.edit().putString("selected_audio_uri", uriPath).apply()
+        sharedPreferences.edit().putString("selected_audio_uri", uri.toString()).apply()
     }
 
-    // Retrieve the Uri
+    /**
+     * Retrieve the Uri
+     */
     private fun getSavedUri(): Uri? {
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         val uriString = sharedPreferences.getString("selected_audio_uri", null)
         return if (uriString != null) Uri.parse(uriString)
         else null
     }
+
+    /**
+     * Function to request permission
+     */
+    private fun requestPermission(permission: String, onGranted: () -> Unit) {
+        val permissionStatus = ContextCompat.checkSelfPermission(this@MainActivity, permission)
+        if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
+            onGranted()
+        } else {
+            ActivityCompat.requestPermissions(this@MainActivity as Activity, arrayOf(permission), 100)
+        }
+    }
 }
+

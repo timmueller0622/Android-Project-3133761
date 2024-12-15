@@ -1,8 +1,6 @@
 package com.example.androidproject3133761
 
-import android.content.Context
 import android.content.Intent
-import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -21,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -32,10 +29,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.unit.dp
 
 
@@ -48,20 +43,21 @@ class Menu : ComponentActivity() {
         enableEdgeToEdge()
 
         SoundPlayer.init(this)
+        SoundPlayer.changeContext(this)
         setContent {
 
 
-            //add null check for uri
+            // set up uri or get Uri from persistent storage if possible
             var selectedAudioUri = Uri.EMPTY
             val uriFromIntent = intent.getStringExtra("customSound")
             if (uriFromIntent != null){
                 selectedAudioUri = Uri.parse(uriFromIntent)
-                Text(selectedAudioUri.toString())
             }
 
-
+            // declares intent
             val currentIntent = Intent(this, Player::class.java)
 
+            // variable to display current selected sound name
             var selectedSoundName by remember { mutableStateOf("") }
 
             Column(modifier = Modifier.fillMaxSize(),
@@ -105,7 +101,7 @@ class Menu : ComponentActivity() {
                 Spacer(modifier = Modifier.width(20.dp))
                 SoundButton(
                     painterResource(id = R.drawable.music),
-                    getUriFileName(selectedAudioUri?.path.toString()),
+                    "custom",
                     0,
                     selectedAudioUri
                 ) { selectedSoundName = it }
@@ -114,7 +110,8 @@ class Menu : ComponentActivity() {
 
                 Spacer(modifier = Modifier.height(20.dp))
                 ExtendedFloatingActionButton(onClick = {
-                    currentIntent.putExtra("soundId", SoundPlayer.getSoundName())
+                    SoundPlayer.reset()
+                    intent.putExtra("customSound", selectedAudioUri.toString())
                     startActivity(currentIntent)
                 }) {
                     Icon(Icons.Filled.PlayArrow, "play")
@@ -139,18 +136,23 @@ fun SoundButton(
     onSelected: (String) -> Unit
 ){
     val soundPlayer = SoundPlayer
-    soundPlayer.setSoundName(name)
     Button(modifier = Modifier.size(100.dp, 100.dp),
         shape = RoundedCornerShape(20),
         onClick = {
-            onSelected(name) // Update the selected sound name
+            if (selectedAudioUri == Uri.EMPTY)
+                onSelected(name) // Update the selected sound name
+            else
+                onSelected(getUriFileName(selectedAudioUri.path.toString()))
 
             //check for soundId. If 0, then we use alternate way for soundPlayer to play sound via Uri
             if (soundId == 0){
                 soundPlayer.playSoundFromUri(selectedAudioUri)
             }
             else
-                soundPlayer.playSound(soundId)
+                soundPlayer.playNewSound(soundId)
+
+            //set the right sound name
+            soundPlayer.setSoundName(name)
         }
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally){
